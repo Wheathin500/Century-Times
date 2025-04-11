@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Word Document Viewer</title>
+  <script src="https://unpkg.com/mammoth/mammoth.browser.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 2em;
+      background-color: #f9f9f9;
+    }
+    .doc-container {
+      margin-bottom: 2em;
+      padding: 1em;
+      background: white;
+      border: 1px solid #ccc;
+    }
+    h2 {
+      color: #333;
+    }
+    h3 {
+      color: #555;
+    }
+  </style>
+</head>
+<body>
+  <h2>Available Documents</h2>
+  <div id="documents">Loading documents...</div>
+
+  <script>
+    // List of Word documents hosted on the server
+    const documentFiles = [
+      'docs/doc1.docx',
+      'docs/doc2.docx',
+      'docs/doc3.docx'
+    ];
+
+    const container = document.getElementById("documents");
+    container.innerHTML = ""; // Clear the loading text
+
+    documentFiles.forEach((file, index) => {
+      fetch(file)
+        .then(response => {
+          if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+          return response.arrayBuffer();
+        })
+        .then(arrayBuffer => mammoth.convertToHtml({ arrayBuffer }))
+        .then(result => {
+          const div = document.createElement("div");
+          div.className = "doc-container";
+          div.innerHTML = `<h3>Document ${index + 1}</h3>` + result.value;
+          container.appendChild(div);
+        })
+        .catch(error => {
+          const div = document.createElement("div");
+          div.className = "doc-container";
+          div.innerHTML = `<h3>Document ${index + 1}</h3><p style="color:red;">Error loading document: ${error.message}</p>`;
+          container.appendChild(div);
+        });
+    });
+  </script>
+</body>
+</html>
